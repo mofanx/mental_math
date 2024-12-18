@@ -23,8 +23,7 @@ dev_dependencies:
 
 flutter_icons:
   android: true
-  ios: true
-  remove_alpha_ios: true
+  ios: false
   image_path: "android/app/src/main/ic_launcher-playstore.png"
   min_sdk_android: 21
   adaptive_icon_background: "#FFFFFF"

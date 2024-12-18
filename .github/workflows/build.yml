@@ -81,7 +81,7 @@ jobs:
           exit 1
         fi
     
-    # 安装依赖
+```    # 安装依赖
     - name: Install dependencies
       run: flutter pub get
     
