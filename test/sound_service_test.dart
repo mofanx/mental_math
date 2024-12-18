@@ -34,7 +34,7 @@ void main() {
       try {
         await soundService.initialize();
       } catch (e) {
-        debugPrint('初始化音频服务时出错：$e');
+        print('初始化音频服务时出错：$e');
         // 继续测试，因为我们主要测试静音功能
       }
     });
@@ -76,7 +76,7 @@ void main() {
       try {
         await soundService.dispose();
       } catch (e) {
-        debugPrint('清理音频服务时出错：$e');
+        print('清理音频服务时出错：$e');
       }
     });
   });
