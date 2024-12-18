@@ -10,6 +10,7 @@ build/
 *.iws
 .idea/
 .vscode/
+.windsurfrules
 
 # Android specific
 **/android/**/gradle-wrapper.jar

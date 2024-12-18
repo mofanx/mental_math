@@ -2,11 +2,14 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mental_math/services/sound_service.dart';
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+  
   group('SoundService Tests', () {
     late SoundService soundService;
 
-    setUp(() {
+    setUp(() async {
       soundService = SoundService();
+      await soundService.initialize();
     });
 
     test('初始化时不应该处于静音状态', () {
@@ -36,6 +39,10 @@ void main() {
         await soundService.playButtonClick();
         await soundService.playCountdown();
       }, returnsNormally);
+    });
+
+    tearDown(() async {
+      await soundService.dispose();
     });
   });
 }
