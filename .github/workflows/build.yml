@@ -81,6 +81,20 @@ jobs:
           exit 1
         fi
     
+    # 生成图标
+    - name: Generate default app icon
+      run: |
+        mkdir -p android/app/src/main/res/mipmap-hdpi
+        mkdir -p android/app/src/main/res/mipmap-mdpi
+        mkdir -p android/app/src/main/res/mipmap-xhdpi
+        mkdir -p android/app/src/main/res/mipmap-xxhdpi
+        mkdir -p android/app/src/main/res/mipmap-xxxhdpi
+        cp .github/resources/ic_launcher.png android/app/src/main/res/mipmap-hdpi/
+        cp .github/resources/ic_launcher.png android/app/src/main/res/mipmap-mdpi/
+        cp .github/resources/ic_launcher.png android/app/src/main/res/mipmap-xhdpi/
+        cp .github/resources/ic_launcher.png android/app/src/main/res/mipmap-xxhdpi/
+        cp .github/resources/ic_launcher.png android/app/src/main/res/mipmap-xxxhdpi/
+    
     # 安装依赖
     - name: Install dependencies
       run: flutter pub get
