@@ -1,0 +1,32 @@
+name: mental_math
+description: A Flutter app to help elementary school students practice mental arithmetic.
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.2
+  provider: ^6.1.1
+  shared_preferences: ^2.2.2
+  audioplayers: ^5.2.1
+  confetti: ^0.7.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.0
+
+flutter:
+  uses-material-design: true
+  
+  assets:
+    - assets/sounds/
+    - assets/images/
+
+  fonts:
+    - family: RubikBubbles
+      fonts:
+        - asset: assets/fonts/RubikBubbles-Regular.ttf
