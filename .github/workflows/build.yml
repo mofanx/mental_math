@@ -5,25 +5,34 @@ on:
     branches: [ main ]
   pull_request:
     branches: [ main ]
+  workflow_dispatch:  # 允许手动触发
+
+env:
+  FLUTTER_VERSION: '3.16.0'
+  JAVA_VERSION: '17'
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0  # 获取完整的git历史用于版本号生成
     
     # 设置 Java 环境
     - name: Set up Java
       uses: actions/setup-java@v3
       with:
         distribution: 'zulu'
-        java-version: '17'
+        java-version: ${{ env.JAVA_VERSION }}
+        cache: 'gradle'  # 缓存Gradle依赖
     
     # 设置 Flutter 环境
     - uses: subosito/flutter-action@v2
       with:
-        flutter-version: '3.16.0'
+        flutter-version: ${{ env.FLUTTER_VERSION }}
         cache: true
+        cache-key: flutter-${{ env.FLUTTER_VERSION }}-${{ runner.os }}
     
     # 缓存 pub 依赖
     - name: Cache pub dependencies
@@ -31,26 +40,46 @@ jobs:
       with:
         path: ${{ env.PUB_CACHE }}
         key: ${{ runner.os }}-pub-${{ hashFiles('**/pubspec.lock') }}
-        restore-keys: ${{ runner.os }}-pub-
+        restore-keys: |
+          ${{ runner.os }}-pub-
     
     # 验证资源文件存在
     - name: Verify assets
       run: |
-        for file in \
-          "assets/sounds/correct.mp3" \
-          "assets/sounds/wrong.mp3" \
-          "assets/sounds/level_complete.mp3" \
-          "assets/sounds/button_click.mp3" \
-          "assets/sounds/countdown.mp3" \
-          "assets/images/ic_launcher.svg" \
-          "assets/images/splash.svg" \
+        mkdir -p assets/sounds assets/images assets/fonts
+        
+        # 创建必要的目录
+        for dir in sounds images fonts; do
+          mkdir -p "assets/$dir"
+        done
+        
+        # 验证所有必需的资源文件
+        required_files=(
+          "assets/sounds/correct.mp3"
+          "assets/sounds/wrong.mp3"
+          "assets/sounds/level_complete.mp3"
+          "assets/sounds/button_click.mp3"
+          "assets/sounds/countdown.mp3"
+          "assets/images/ic_launcher.svg"
+          "assets/images/splash.svg"
+          "assets/images/medal_gold.svg"
+          "assets/images/medal_silver.svg"
+          "assets/images/medal_bronze.svg"
           "assets/fonts/RubikBubbles-Regular.ttf"
-        do
+        )
+        
+        missing_files=()
+        for file in "${required_files[@]}"; do
           if [ ! -f "$file" ]; then
-            echo "Error: Missing asset file: $file"
-            exit 1
+            missing_files+=("$file")
           fi
         done
+        
+        if [ ${#missing_files[@]} -ne 0 ]; then
+          echo "错误：以下资源文件缺失："
+          printf '%s\n' "${missing_files[@]}"
+          exit 1
+        fi
     
     # 安装依赖
     - name: Install dependencies
@@ -58,31 +87,55 @@ jobs:
     
     # 运行测试
     - name: Run tests
-      run: flutter test
+      run: flutter test --coverage
+    
+    # 上传测试覆盖率报告
+    - name: Upload coverage reports
+      uses: codecov/codecov-action@v3
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        file: ./coverage/lcov.info
     
     # 分析代码
     - name: Analyze code
-      run: flutter analyze
+      run: |
+        flutter analyze
+        if [ $? -ne 0 ]; then
+          echo "代码分析发现问题，请修复后重试"
+          exit 1
+        fi
     
     # 构建APK
     - name: Build APK
-      run: flutter build apk --release
+      run: flutter build apk --release --split-per-abi
     
     # 上传APK
-    - name: Upload APK
+    - name: Upload APKs
       uses: actions/upload-artifact@v3
       with:
         name: mental-math-release
-        path: build/app/outputs/flutter-apk/app-release.apk
+        path: |
+          build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
+          build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+          build/app/outputs/flutter-apk/app-x86_64-release.apk
+        retention-days: 7
         
-    # 如果是在main分支上，创建Release
+    # 创建Release
     - name: Create Release
       if: github.ref == 'refs/heads/main'
       uses: softprops/action-gh-release@v1
       with:
-        files: build/app/outputs/flutter-apk/app-release.apk
+        files: |
+          build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
+          build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+          build/app/outputs/flutter-apk/app-x86_64-release.apk
         name: Release ${{ github.sha }}
         tag_name: v${{ github.run_number }}
+        body: |
+          Mental Math App Release
+          
+          Changes in this release:
+          ${{ github.event.head_commit.message }}
         draft: false
         prerelease: false
       env:

@@ -1,0 +1,2 @@
+My goal is to develop a children's mental arithmetic application to help young children master addition, subtraction, multiplication, and division operations.
+My local resources are limited, so I didn't set up a development environment locally, but chose to use GitHub Actions for building.

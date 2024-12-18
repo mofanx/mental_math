@@ -1,10 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 import '../services/game_state.dart';
 import 'home_screen.dart';
 
 class ResultScreen extends StatelessWidget {
   const ResultScreen({super.key});
+
+  String _getMedalAsset(int score) {
+    if (score >= 90) return 'assets/images/medal_gold.svg';
+    if (score >= 70) return 'assets/images/medal_silver.svg';
+    if (score >= 50) return 'assets/images/medal_bronze.svg';
+    return '';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,8 +41,17 @@ class ResultScreen extends StatelessWidget {
                 const SizedBox(height: 40),
                 Consumer<GameState>(
                   builder: (context, gameState, child) {
+                    final medalAsset = _getMedalAsset(gameState.score.toInt());
                     return Column(
                       children: [
+                        if (medalAsset.isNotEmpty) ...[
+                          SvgPicture.asset(
+                            medalAsset,
+                            width: 120,
+                            height: 120,
+                          ),
+                          const SizedBox(height: 20),
+                        ],
                         _buildResultCard(
                           '最终得分',
                           gameState.score.toString(),

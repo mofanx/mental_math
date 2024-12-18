@@ -13,6 +13,7 @@ dependencies:
   shared_preferences: ^2.2.2
   audioplayers: ^5.2.1
   confetti: ^0.7.0
+  flutter_svg: ^2.0.9
 
 dev_dependencies:
   flutter_test:
@@ -32,11 +33,9 @@ flutter:
     # 图片资源
     - assets/images/ic_launcher.svg
     - assets/images/splash.svg
-    - assets/images/background.png
-    - assets/images/logo.png
-    - assets/images/medal_gold.png
-    - assets/images/medal_silver.png
-    - assets/images/medal_bronze.png
+    - assets/images/medal_gold.svg
+    - assets/images/medal_silver.svg
+    - assets/images/medal_bronze.svg
     
   fonts:
     - family: RubikBubbles
