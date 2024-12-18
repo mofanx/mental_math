@@ -7,31 +7,35 @@ void main() {
 
   // 设置音频通道测试处理程序
   const MethodChannel channel = MethodChannel('xyz.luan/audioplayers');
-  TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
-    channel,
-    (MethodCall methodCall) async {
-      switch (methodCall.method) {
-        case 'setVolume':
-        case 'resume':
-        case 'stop':
-        case 'setSource':
-          return null;
-        default:
-          return null;
-      }
-    },
-  );
+  
+  setUp(() {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+      channel,
+      (MethodCall methodCall) async {
+        switch (methodCall.method) {
+          case 'setVolume':
+          case 'resume':
+          case 'stop':
+          case 'setSource':
+          case 'dispose':
+            return null;
+          default:
+            return null;
+        }
+      },
+    );
+  });
   
   group('SoundService Tests', () {
     late SoundService soundService;
 
     setUp(() async {
       soundService = SoundService();
-      // 在测试环境中，initialize可能会失败，但我们不关心这个
       try {
         await soundService.initialize();
       } catch (e) {
-        // 忽略初始化错误
+        debugPrint('初始化音频服务时出错：$e');
+        // 继续测试，因为我们主要测试静音功能
       }
     });
 
@@ -55,27 +59,29 @@ void main() {
     test('静音时不应该播放声音', () async {
       soundService.toggleMute(); // 开启静音
       
-      // 验证所有音效方法在静音时都不会抛出异常
-      await expectLater(() async {
+      // 创建一个Future来包装所有的音频操作
+      Future<void> playAllSounds() async {
         await soundService.playCorrect();
         await soundService.playWrong();
         await soundService.playLevelComplete();
         await soundService.playButtonClick();
         await soundService.playCountdown();
-      }, completes);
+      }
+
+      // 使用expectLater来测试Future的完成
+      await expectLater(playAllSounds(), completes);
     });
 
     tearDown(() async {
       try {
         await soundService.dispose();
       } catch (e) {
-        // 忽略清理错误
+        debugPrint('清理音频服务时出错：$e');
       }
     });
   });
 
-  // 清理mock
-  tearDownAll(() {
+  tearDown(() {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
       channel,
       null,
