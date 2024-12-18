@@ -21,9 +21,10 @@ allprojects {
 rootProject.buildDir = '../build'
 subprojects {
     project.buildDir = "${rootProject.buildDir}/${project.name}"
-    project.evaluationDependsOn(':app')
+}
 
-    afterEvaluate {
+gradle.projectsEvaluated {
+    subprojects { project ->
         if (project.hasProperty("android")) {
             android {
                 compileSdkVersion 34
