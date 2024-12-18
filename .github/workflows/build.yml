@@ -81,23 +81,32 @@ jobs:
           exit 1
         fi
     
-    # 生成图标
-    - name: Generate default app icon
-      run: |
-        mkdir -p android/app/src/main/res/mipmap-hdpi
-        mkdir -p android/app/src/main/res/mipmap-mdpi
-        mkdir -p android/app/src/main/res/mipmap-xhdpi
-        mkdir -p android/app/src/main/res/mipmap-xxhdpi
-        mkdir -p android/app/src/main/res/mipmap-xxxhdpi
-        cp .github/resources/ic_launcher.png android/app/src/main/res/mipmap-hdpi/
-        cp .github/resources/ic_launcher.png android/app/src/main/res/mipmap-mdpi/
-        cp .github/resources/ic_launcher.png android/app/src/main/res/mipmap-xhdpi/
-        cp .github/resources/ic_launcher.png android/app/src/main/res/mipmap-xxhdpi/
-        cp .github/resources/ic_launcher.png android/app/src/main/res/mipmap-xxxhdpi/
-    
     # 安装依赖
     - name: Install dependencies
       run: flutter pub get
+    
+    # 安装 ImageMagick
+    - name: Install ImageMagick
+      run: sudo apt-get update && sudo apt-get install -y imagemagick
+    
+    # 生成图标
+    - name: Generate app icon
+      run: |
+        # 创建图标所需的目录
+        mkdir -p android/app/src/main
+        
+        # 创建一个简单的图标
+        convert -size 512x512 xc:white \
+          -fill "#2196F3" \
+          -draw "circle 256,256 256,50" \
+          -fill white \
+          -pointsize 200 \
+          -gravity center \
+          -draw "text 0,0 'M'" \
+          android/app/src/main/ic_launcher-playstore.png
+        
+        # 使用flutter_launcher_icons生成所有尺寸的图标
+        flutter pub run flutter_launcher_icons
     
     # 运行测试
     - name: Run tests
