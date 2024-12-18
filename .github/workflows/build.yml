@@ -85,9 +85,11 @@ jobs:
     - name: Install dependencies
       run: flutter pub get
     
-    # 安装 ImageMagick
-    - name: Install ImageMagick
-      run: sudo apt-get update && sudo apt-get install -y imagemagick
+    # 安装 ImageMagick 和字体
+    - name: Install required packages
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y imagemagick fonts-liberation
     
     # 生成图标
     - name: Generate app icon
@@ -95,14 +97,12 @@ jobs:
         # 创建图标所需的目录
         mkdir -p android/app/src/main
         
-        # 创建一个简单的图标
+        # 创建一个简单的图标（不使用文字，只用图形）
         convert -size 512x512 xc:white \
           -fill "#2196F3" \
           -draw "circle 256,256 256,50" \
-          -fill white \
-          -pointsize 200 \
-          -gravity center \
-          -draw "text 0,0 'M'" \
+          -fill "#1565C0" \
+          -draw "circle 256,256 256,150" \
           android/app/src/main/ic_launcher-playstore.png
         
         # 使用flutter_launcher_icons生成所有尺寸的图标
