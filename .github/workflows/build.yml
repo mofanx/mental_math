@@ -11,17 +11,79 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
+    
+    # 设置 Java 环境
+    - name: Set up Java
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'zulu'
+        java-version: '17'
+    
+    # 设置 Flutter 环境
     - uses: subosito/flutter-action@v2
       with:
         flutter-version: '3.16.0'
+        cache: true
+    
+    # 缓存 pub 依赖
+    - name: Cache pub dependencies
+      uses: actions/cache@v3
+      with:
+        path: ${{ env.PUB_CACHE }}
+        key: ${{ runner.os }}-pub-${{ hashFiles('**/pubspec.lock') }}
+        restore-keys: ${{ runner.os }}-pub-
+    
+    # 验证资源文件存在
+    - name: Verify assets
+      run: |
+        for file in \
+          "assets/sounds/correct.mp3" \
+          "assets/sounds/wrong.mp3" \
+          "assets/sounds/level_complete.mp3" \
+          "assets/sounds/button_click.mp3" \
+          "assets/sounds/countdown.mp3" \
+          "assets/images/ic_launcher.svg" \
+          "assets/images/splash.svg" \
+          "assets/fonts/RubikBubbles-Regular.ttf"
+        do
+          if [ ! -f "$file" ]; then
+            echo "Error: Missing asset file: $file"
+            exit 1
+          fi
+        done
+    
+    # 安装依赖
     - name: Install dependencies
       run: flutter pub get
+    
+    # 运行测试
     - name: Run tests
       run: flutter test
+    
+    # 分析代码
+    - name: Analyze code
+      run: flutter analyze
+    
+    # 构建APK
     - name: Build APK
-      run: flutter build apk
+      run: flutter build apk --release
+    
+    # 上传APK
     - name: Upload APK
       uses: actions/upload-artifact@v3
       with:
-        name: release-apk
+        name: mental-math-release
         path: build/app/outputs/flutter-apk/app-release.apk
+        
+    # 如果是在main分支上，创建Release
+    - name: Create Release
+      if: github.ref == 'refs/heads/main'
+      uses: softprops/action-gh-release@v1
+      with:
+        files: build/app/outputs/flutter-apk/app-release.apk
+        name: Release ${{ github.sha }}
+        tag_name: v${{ github.run_number }}
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

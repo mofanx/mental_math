@@ -23,9 +23,21 @@ flutter:
   uses-material-design: true
   
   assets:
-    - assets/sounds/
-    - assets/images/
-
+    # 音效文件
+    - assets/sounds/correct.mp3
+    - assets/sounds/wrong.mp3
+    - assets/sounds/level_complete.mp3
+    - assets/sounds/button_click.mp3
+    - assets/sounds/countdown.mp3
+    # 图片资源
+    - assets/images/ic_launcher.svg
+    - assets/images/splash.svg
+    - assets/images/background.png
+    - assets/images/logo.png
+    - assets/images/medal_gold.png
+    - assets/images/medal_silver.png
+    - assets/images/medal_bronze.png
+    
   fonts:
     - family: RubikBubbles
       fonts:
